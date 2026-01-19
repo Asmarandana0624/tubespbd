@@ -1,0 +1,197 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Pawoon Dinamis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 h-screen flex flex-col overflow-hidden">
+
+  <header class="relative flex items-center h-16 px-6 bg-slate-700 text-white shadow shrink-0">
+    <div class="text-sm text-slate-200">Bandung Dago</div>
+    <div class="absolute left-1/2 -translate-x-1/2 text-xl font-semibold tracking-wide italic">IEU TEH RESTO</div>
+    <div class="ml-auto text-sm uppercase text-slate-300">💾 Tersimpan</div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+
+    <aside class="w-56 bg-white border-r p-4 text-sm">
+      <ul class="space-y-1" id="category-list">
+        <li class="font-semibold text-slate-700 mb-3 uppercase">Item Menu</li>
+        <li onclick="filterCategory('Semua')" class="cursor-pointer hover:bg-slate-100 px-3 py-2 rounded font-medium bg-slate-200" data-cat="Semua">Semua Produk</li>
+        <li onclick="filterCategory('Makanan')" class="cursor-pointer hover:bg-slate-100 px-3 py-2 rounded text-slate-600" data-cat="Makanan">Makanan</li>
+        <li onclick="filterCategory('Minuman')" class="cursor-pointer hover:bg-slate-100 px-3 py-2 rounded text-slate-600" data-cat="Minuman">Minuman</li>
+        <li onclick="filterCategory('Camilan')" class="cursor-pointer hover:bg-slate-100 px-3 py-2 rounded text-slate-600" data-cat="Camilan">Camilan</li>
+      </ul>
+    </aside>
+
+    <main class="flex-1 p-4 overflow-y-auto">
+      <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        </div>
+    </main>
+
+    <aside class="w-80 bg-white border-l p-4 flex flex-col shadow-lg">
+      <h2 class="font-bold text-lg mb-4 border-b pb-2">Pesanan</h2>
+
+      <div id="cart-items" class="flex-1 overflow-y-auto space-y-3 text-sm">
+        <p class="text-slate-400 italic text-center mt-10">Belum ada pesanan</p>
+      </div>
+
+      <div class="border-t pt-4 mt-4">
+        <div class="flex justify-between font-bold text-lg mb-4">
+          <span>Total</span>
+          <span id="cart-total">Rp0</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="clearCart()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded font-semibold hover:bg-slate-300 transition">Reset</button>
+          <button onclick="checkout()" class="flex-1 bg-slate-700 text-white py-3 rounded font-semibold hover:bg-slate-800 transition">Bayar</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    // 1. ITEM MENU
+    const products = [
+      // --- MINUMAN ---
+      { id: 1, name: "Latte Coffee", price: 25000, category: "Minuman", img: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=300&fit=crop" },
+      { id: 2, name: "Cappuccino", price: 27000, category: "Minuman", img: "https://images.unsplash.com/photo-1534778101976-62847782c213?w=200&h=200&fit=crop" },
+      { id: 3, name: "Ice Lemonade", price: 15000, category: "Minuman", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200&h=200&fit=crop" },
+      { id: 4, name: "Matcha Latte", price: 28000, category: "Minuman", img: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=200&h=200&fit=crop" },
+      { id: 5, name: "Es Kopi Gula Aren", price: 20000, category: "Minuman", img: "https://images.unsplash.com/photo-1553909489-cd47e0907980?w=200&h=200&fit=crop" },
+      { id: 6, name: "Hot Chocolate", price: 25000, category: "Minuman", img: "https://dfjx2uxqg3cgi.cloudfront.net/img/photo/184656/184656_00_2x.jpg?20190901060522" },
+      { id: 7, name: "Thai Tea", price: 18000, category: "Minuman", img: "https://japo.co.id/wp-content/uploads/2022/10/thai-teaa.jpg" },
+      { id: 8, name: "Iced Peach Tea", price: 22000, category: "Minuman", img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=200&h=200&fit=crop" },
+      { id: 9, name: "Espresso Single", price: 15000, category: "Minuman", img: "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=200&h=200&fit=crop" },
+      { id: 10, name: "Strawberry Mojito", price: 26000, category: "Minuman", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200&h=200&fit=crop" },
+
+      // --- MAKANAN ---
+      { id: 11, name: "Croissant Tuna", price: 18000, category: "Makanan", img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=200&h=200&fit=crop" },
+      { id: 12, name: "Nasi Goreng POS", price: 35000, category: "Makanan", img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=200&h=200&fit=crop" },
+      { id: 13, name: "Club Sandwich", price: 32000, category: "Makanan", img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&h=200&fit=crop" },
+      { id: 14, name: "Chicken Steak", price: 45000, category: "Makanan", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=200&h=200&fit=crop" },
+      { id: 15, name: "Beef Burger", price: 38000, category: "Makanan", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop" },
+      { id: 16, name: "Spaghetti Bolognese", price: 35000, category: "Makanan", img: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=200&h=200&fit=crop" },
+      { id: 17, name: "Fettuccine Carbonara", price: 37000, category: "Makanan", img: "https://images.unsplash.com/photo-1612459284970-e8f027596582?w=200&h=200&fit=crop" },
+      { id: 18, name: "Ayam Bakar Madu", price: 42000, category: "Makanan", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=200&h=200&fit=crop" },
+      { id: 19, name: "Mie Goreng Spesial", price: 28000, category: "Makanan", img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200&h=200&fit=crop" },
+      { id: 20, name: "Beef Teriyaki Rice", price: 40000, category: "Makanan", img: "https://sudachirecipes.com/wp-content/uploads/2024/01/wasabi-teriyaki-beef-bowl-thumb.jpg" },
+
+      // --- CAMILAN ---
+      { id: 21, name: "Kentang Goreng", price: 12000, category: "Camilan", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&h=200&fit=crop" },
+      { id: 22, name: "Onion Rings", price: 15000, category: "Camilan", img: "https://buckets.sasa.co.id/v1/AUTH_Assets/Assets/p/website/medias/page_medias/resep_onion_ring.jpg" },
+      { id: 23, name: "Pisang Goreng Keju", price: 18000, category: "Camilan", img: "https://images.unsplash.com/photo-1612392062631-94dd858cba88?w=200&h=200&fit=crop" },
+      { id: 24, name: "Cireng Bumbu Rujak", price: 15000, category: "Camilan", img: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?w=200&h=200&fit=crop" },
+      { id: 25, name: "Tahu Walik", price: 15000, category: "Camilan", img: "https://palpos.disway.id/upload/abb3d066c43a4b9cd7619ed3a55ed020.jpg" },
+      { id: 26, name: "Singkong Thailand", price: 20000, category: "Camilan", img: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?w=200&h=200&fit=crop" },
+      { id: 27, name: "Chicken Wings", price: 25000, category: "Camilan", img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=200&h=200&fit=crop" },
+      { id: 28, name: "Dimsum Mix", price: 22000, category: "Camilan", img: "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=200&h=200&fit=crop" },
+      { id: 29, name: "Edamame Garlic", price: 18000, category: "Camilan", img: "https://images.unsplash.com/photo-1528751014936-863e6e7a319c?w=200&h=200&fit=crop" },
+      { id: 30, name: "Donat Gula", price: 10000, category: "Camilan", img: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=200&h=200&fit=crop" }
+    ];
+
+    let cart = [];
+
+    // 2. MENAMPILKAN PRODUK
+    function renderProducts(filter = 'Semua') {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = '';
+
+      const filtered = filter === 'Semua' ? products : products.filter(p => p.category === filter);
+
+      filtered.forEach(product => {
+        grid.innerHTML += `
+          <div onclick="addToCart(${product.id})" class="bg-white rounded-xl shadow-sm border border-slate-100 p-3 text-center cursor-pointer hover:shadow-md hover:border-slate-300 transition active:scale-95">
+            <img src="${product.img}" class="mx-auto mb-3 rounded-lg w-full h-32 object-cover" />
+            <p class="text-sm font-semibold text-slate-800">${product.name}</p>
+            <p class="text-xs text-slate-500 mt-1">Rp${product.price.toLocaleString()}</p>
+          </div>
+        `;
+      });
+    }
+
+    // 3. FUNGSI FILTER KATEGORI
+    function filterCategory(cat) {
+      renderProducts(cat);
+      // Update UI active state
+      document.querySelectorAll('#category-list li').forEach(el => {
+        el.classList.remove('bg-slate-200', 'font-medium');
+        if(el.getAttribute('data-cat') === cat) el.classList.add('bg-slate-200', 'font-medium');
+      });
+    }
+
+    // 4. Pesanan
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      const exist = cart.find(item => item.id === id);
+
+      if (exist) {
+        exist.qty++;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const cartContainer = document.getElementById('cart-items');
+      const totalDisplay = document.getElementById('cart-total');
+      
+      if (cart.length === 0) {
+        cartContainer.innerHTML = '<p class="text-slate-400 italic text-center mt-10">Belum ada pesanan</p>';
+        totalDisplay.innerText = 'Rp0';
+        return;
+      }
+
+      cartContainer.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        total += item.price * item.qty;
+        cartContainer.innerHTML += `
+          <div class="flex justify-between items-center animate-fadeIn">
+            <div>
+              <span class="font-bold text-slate-700">${item.qty}x</span>
+              <span class="ml-1">${item.name}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span>Rp${(item.price * item.qty).toLocaleString()}</span>
+              <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+            </div>
+          </div>
+        `;
+      });
+
+      totalDisplay.innerText = `Rp${total.toLocaleString()}`;
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCart();
+    }
+
+    function checkout() {
+      if(cart.length === 0) return alert("Keranjang masih kosong!");
+      alert("Transaksi Berhasil! Total: " + document.getElementById('cart-total').innerText);
+      clearCart();
+    }
+
+    // Inisialisasi awal
+    renderProducts();
+  </script>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+  </style>
+</body>
+</html>
